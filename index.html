@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SatFusion — Satellite Data Fusion Dashboard</title>
+  <meta name="description" content="A powerful satellite data fusion dashboard simulating how agencies like NASA and ISRO merge multi-satellite telemetry using K-way merge algorithms with live timeline visualization." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Animated Background -->
+  <div class="bg-stars" id="bgStars"></div>
+  <div class="bg-nebula"></div>
+  <div class="orbit-ring orbit-ring-1"></div>
+  <div class="orbit-ring orbit-ring-2"></div>
+  <div class="orbit-ring orbit-ring-3"></div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 40 40" fill="none">
+            <circle cx="20" cy="20" r="8" stroke="#00d4ff" stroke-width="2"/>
+            <ellipse cx="20" cy="20" rx="18" ry="7" stroke="#00d4ff" stroke-width="1.5" opacity="0.6"/>
+            <ellipse cx="20" cy="20" rx="18" ry="7" stroke="#00d4ff" stroke-width="1.5" opacity="0.6" transform="rotate(60 20 20)"/>
+            <ellipse cx="20" cy="20" rx="18" ry="7" stroke="#00d4ff" stroke-width="1.5" opacity="0.6" transform="rotate(120 20 20)"/>
+            <circle cx="20" cy="20" r="3" fill="#00d4ff"/>
+            <circle cx="38" cy="20" r="2" fill="#ff6b35"/>
+            <circle cx="29" cy="7" r="2" fill="#a855f7"/>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span class="logo-title">SatFusion</span>
+          <span class="logo-sub">Satellite Data Fusion Dashboard</span>
+        </div>
+      </div>
+      <nav class="header-nav">
+        <div class="status-badge" id="statusBadge">
+          <span class="status-dot"></span>
+          <span id="statusText">Ready</span>
+        </div>
+        <div class="algo-indicator" id="algoIndicator">
+          <span>Algorithm:</span>
+          <span id="currentAlgo">K-Way Merge</span>
+        </div>
+        <div class="live-clock" id="liveClock"></div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <main class="main-layout">
+
+    <!-- LEFT: Upload Panel -->
+    <aside class="panel panel-upload" id="uploadPanel">
+      <div class="panel-header">
+        <div class="panel-icon">📡</div>
+        <h2>Satellite Data Sources</h2>
+      </div>
+
+      <!-- Preloaded Satellites -->
+      <div class="section-label">Preloaded Satellites</div>
+      <div class="preload-satellites">
+        <div class="satellite-card preloaded active" data-sat="SAT-A" id="preloadA">
+          <div class="sat-icon" style="background: linear-gradient(135deg,#00d4ff,#0080ff)">🛰</div>
+          <div class="sat-info">
+            <div class="sat-name">ISRO NavIC-1A</div>
+            <div class="sat-meta">120 readings · Temp/Humidity</div>
+          </div>
+          <div class="sat-toggle active" id="toggleA">ON</div>
+        </div>
+        <div class="satellite-card preloaded active" data-sat="SAT-B" id="preloadB">
+          <div class="sat-icon" style="background: linear-gradient(135deg,#a855f7,#7c3aed)">🛰</div>
+          <div class="sat-info">
+            <div class="sat-name">NASA Terra-7</div>
+            <div class="sat-meta">95 readings · Rainfall/Pressure</div>
+          </div>
+          <div class="sat-toggle active" id="toggleB">ON</div>
+        </div>
+        <div class="satellite-card preloaded active" data-sat="SAT-C" id="preloadC">
+          <div class="sat-icon" style="background: linear-gradient(135deg,#ff6b35,#f59e0b)">🛰</div>
+          <div class="sat-info">
+            <div class="sat-name">ESA Sentinel-6</div>
+            <div class="sat-meta">108 readings · Wind/UV Index</div>
+          </div>
+          <div class="sat-toggle active" id="toggleC">ON</div>
+        </div>
+        <div class="satellite-card preloaded" data-sat="SAT-D" id="preloadD">
+          <div class="sat-icon" style="background: linear-gradient(135deg,#10b981,#059669)">🛰</div>
+          <div class="sat-info">
+            <div class="sat-name">JAXA GCOM-W2</div>
+            <div class="sat-meta">87 readings · Sea Surface Temp</div>
+          </div>
+          <div class="sat-toggle" id="toggleD">OFF</div>
+        </div>
+      </div>
+
+      <!-- Upload Custom Dataset -->
+      <div class="section-label" style="margin-top:18px;">Upload Custom Dataset</div>
+      <div class="upload-zone" id="uploadZone">
+        <div class="upload-icon">⬆</div>
+        <div class="upload-text">Drop CSV / JSON here</div>
+        <div class="upload-sub">or click to browse</div>
+        <input type="file" id="fileInput" accept=".csv,.json" multiple hidden />
+      </div>
+      <div class="custom-sats-list" id="customSatsList"></div>
+
+      <!-- Algorithm Selection -->
+      <div class="section-label" style="margin-top:18px;">Merge Algorithm</div>
+      <div class="algo-selector">
+        <button class="algo-btn active" id="btnKway" data-algo="kway">
+          <span class="algo-icon">⚡</span>
+          <div>
+            <div class="algo-name">K-Way Merge Sort</div>
+            <div class="algo-desc">Min-heap based, O(N log K)</div>
+          </div>
+        </button>
+        <button class="algo-btn" id="btnHeap" data-algo="heap">
+          <span class="algo-icon">🔺</span>
+          <div>
+            <div class="algo-name">Heap Merge</div>
+            <div class="algo-desc">Priority queue, O(N log K)</div>
+          </div>
+        </button>
+        <button class="algo-btn" id="btnNaive" data-algo="naive">
+          <span class="algo-icon">🔀</span>
+          <div>
+            <div class="algo-name">Naive Merge</div>
+            <div class="algo-desc">Concat + Sort, O(N log N)</div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Run Merge Button -->
+      <button class="run-btn" id="runMergeBtn">
+        <span class="run-icon">▶</span>
+        <span>Run Fusion</span>
+        <span class="run-badge">MERGE NOW</span>
+      </button>
+
+      <!-- Stats Panel -->
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-box">
+          <div class="stat-val" id="statTotal">—</div>
+          <div class="stat-label">Total Records</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="statSats">3</div>
+          <div class="stat-label">Active Satellites</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="statTime">—</div>
+          <div class="stat-label">Exec Time (ms)</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="statAlgo">K-Way</div>
+          <div class="stat-label">Algorithm Used</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER: Visualization -->
+    <section class="panel panel-viz">
+      <div class="panel-header">
+        <div class="panel-icon">📊</div>
+        <h2>Live Fusion Visualization</h2>
+        <div class="viz-controls">
+          <button class="viz-tab active" id="tabTimeline" data-tab="timeline">Timeline</button>
+          <button class="viz-tab" id="tabMulti" data-tab="multi">Multi-Metric</button>
+          <button class="viz-tab" id="tabRadar" data-tab="radar">Radar</button>
+          <button class="viz-tab" id="tabDisaster" data-tab="disaster">Disaster Track</button>
+        </div>
+      </div>
+
+      <!-- Chart Area -->
+      <div class="chart-container" id="chartContainer">
+        <div class="chart-placeholder" id="chartPlaceholder">
+          <div class="placeholder-anim">
+            <div class="orbit-demo">
+              <div class="planet"></div>
+              <div class="sat-demo sat-demo-1">🛰</div>
+              <div class="sat-demo sat-demo-2">🛰</div>
+              <div class="sat-demo sat-demo-3">🛰</div>
+            </div>
+            <p>Run Fusion to visualize merged satellite data</p>
+          </div>
+        </div>
+        <div class="canvas-wrapper" id="canvasWrapper" style="display:none; position:relative; height:100%; min-width:100%;">
+          <canvas id="mainChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Time Slider -->
+      <div class="time-slider-section" id="timeSliderSection" style="display:none;">
+        <div class="time-slider-header">
+          <span>⏱ Time Filter</span>
+          <span id="sliderRange">All data</span>
+        </div>
+        <input type="range" id="timeSlider" class="time-slider" min="0" max="100" value="100" />
+        <div class="slider-labels">
+          <span id="sliderStart">Start</span>
+          <span>▶ Drag to filter timeline</span>
+          <span id="sliderEnd">End</span>
+        </div>
+      </div>
+
+      <!-- Disaster Tracker -->
+      <div class="disaster-panel" id="disasterPanel" style="display:none;">
+        <div class="disaster-header">
+          <span>🌪 Disaster Tracking Simulator</span>
+          <select id="disasterType" class="disaster-select">
+            <option value="cyclone">Cyclone Track</option>
+            <option value="flood">Flood Prediction</option>
+            <option value="heatwave">Heat Wave</option>
+          </select>
+          <button class="disaster-btn" id="simulateDisaster">▶ Simulate</button>
+        </div>
+        <canvas id="disasterChart" style="display:none;"></canvas>
+        <div class="disaster-alerts" id="disasterAlerts"></div>
+      </div>
+    </section>
+
+    <!-- RIGHT: Timeline Viewer -->
+    <aside class="panel panel-timeline">
+      <div class="panel-header">
+        <div class="panel-icon">📋</div>
+        <h2>Unified Timeline</h2>
+        <div class="timeline-controls">
+          <input type="text" id="timelineSearch" class="search-input" placeholder="🔍 Search..." />
+          <select id="timelineFilter" class="filter-select">
+            <option value="all">All Satellites</option>
+            <option value="SAT-A">NavIC-1A</option>
+            <option value="SAT-B">Terra-7</option>
+            <option value="SAT-C">Sentinel-6</option>
+            <option value="SAT-D">GCOM-W2</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Algorithm Visualizer -->
+      <div class="algo-viz" id="algoViz" style="display:none;">
+        <div class="algo-viz-header">⚙ Algorithm Steps</div>
+        <div class="heap-display" id="heapDisplay"></div>
+        <div class="merge-steps" id="mergeSteps"></div>
+      </div>
+
+      <!-- Timeline List -->
+      <div class="timeline-list" id="timelineList">
+        <div class="timeline-empty">
+          <div style="font-size:3rem;margin-bottom:12px;">🛸</div>
+          <div>No data merged yet.</div>
+          <div style="font-size:0.8rem;color:#666;margin-top:6px;">Select satellites and click Run Fusion</div>
+        </div>
+      </div>
+
+      <!-- Export -->
+      <div class="export-section" id="exportSection" style="display:none;">
+        <button class="export-btn" id="exportCSV">⬇ Export CSV</button>
+        <button class="export-btn" id="exportJSON">⬇ Export JSON</button>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- Step-by-Step Modal -->
+  <div class="modal-overlay" id="modalOverlay" style="display:none;">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">⚙ Algorithm Visualization</span>
+        <button class="modal-close" id="modalClose">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <div id="stepVizContainer"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="step-btn" id="stepPrev" disabled>◀ Prev</button>
+        <span id="stepCounter">Step 0 / 0</span>
+        <button class="step-btn" id="stepNext">Next ▶</button>
+        <button class="step-btn" id="stepAuto">▶ Auto Play</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="data.js"></script>
+  <script src="algorithms.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
