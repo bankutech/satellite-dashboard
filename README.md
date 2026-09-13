@@ -1,4 +1,4 @@
-# satellite-dashboard
+# satellite dashboard
 
 ## Overview
 A high-performance, real-time dashboard for aggregating and visualizing telemetry data from multiple satellite constellations. Built with a Python FastAPI backend and a React/Chart.js frontend.
