@@ -1,5 +1,6 @@
-# SatFusion: Satellite Data Fusion Dashboard
+# satellite-dashboard
 
+## Overview
 A high-performance, real-time dashboard for aggregating and visualizing telemetry data from multiple satellite constellations. Built with a Python FastAPI backend and a React/Chart.js frontend.
 
 ## Features
@@ -32,3 +33,9 @@ A high-performance, real-time dashboard for aggregating and visualizing telemetr
 - **Frontend**: React, Chart.js, Lucide, Axios
 - **Backend**: Python, FastAPI, Heapq, Datetime
 - **Styling**: Vanilla CSS (Custom Monochrome Design System)
+
+## Getting Started
+Please refer to the source files for specific installation and usage instructions. Ensure that your local environment meets the standard requirements for the associated technologies.
+
+## Project Structure
+This project is organized into standard directories. Key configuration files and primary source code are located in the root directory.
